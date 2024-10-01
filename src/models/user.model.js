@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const validator = require('validator')
 
 const userSchema = new mongoose.Schema(
   {
@@ -36,9 +37,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       validate: {
-        validator: function (v) {
-          return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v)
-        },
+        validator: (v) => validator.isEmail(v),
         message: (props) => `${props.value} is not a valid email!`,
       },
     },
@@ -47,9 +46,8 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Contact number is required'],
       minlength: [10, 'Contact number must be at least 10 digits'],
       validate: {
-        validator: function (v) {
-          return /^\d+$/.test(v)
-        },
+        validator: (v) =>
+          validator.isMobilePhone(v, 'any', { strictMode: false }),
         message: (props) => `${props.value} is not a valid contact number!`,
       },
     },
@@ -61,7 +59,15 @@ const userSchema = new mongoose.Schema(
     profilePicture: {
       type: String,
       default: 'default.jpg',
+      validate: {
+        validator: function (v) {
+          return v === 'default.jpg' || validator.isURL(v)
+        },
+        message: (props) =>
+          `${props.value} is not a valid URL or is not the default picture!`,
+      },
     },
+
     bio: {
       type: String,
       maxlength: [200, 'Bio cannot be longer than 200 characters'],
@@ -69,6 +75,10 @@ const userSchema = new mongoose.Schema(
     interests: {
       type: [String],
       default: [],
+      validate: {
+        validator: (v) => v.length <= 50,
+        message: 'Interest cannot be longer than 50 interest fields',
+      },
     },
   },
   { timestamps: true }
