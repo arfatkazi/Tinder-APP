@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt')
 const signup = async (req, res) => {
   try {
     let { firstName, lastName, password, contact, email, gender, age, height } =
-      req.body
+      req?.body
 
     if (!firstName || !lastName || !email || !password) {
       return res
@@ -169,8 +169,18 @@ const userDelete = async (req, res) => {
 
 const userUpdate = async (req, res) => {
   try {
-    const { id } = req.params
-    const updatedData = req.body
+    const { id } = req?.params
+    const updatedData = req?.body
+
+    if (
+      updatedData?.email &&
+      !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(updatedData?.email)
+    ) {
+      return res.status(400).json({ message: 'Invalid email format' })
+    }
+
+    delete updatedData.email
+
     const updateUser = await User.findByIdAndUpdate(id, updatedData, {
       new: true,
       runValidators: true,
