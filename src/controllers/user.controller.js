@@ -144,4 +144,49 @@ const user = async (req, res) => {
 
 //end of  get all user controller
 
-module.exports = { signup, login, logout, feed, user }
+// delete user
+
+const userDelete = async (req, res) => {
+  try {
+    const { id } = req.params
+    console.log(id)
+    const deleteUser = await User.findByIdAndDelete(id)
+
+    if (!deleteUser) {
+      return res.status(404).json({ message: 'user not found' })
+    }
+
+    return res.status(201).json({ message: 'user deleted successfully' })
+  } catch (err) {
+    console.log(`Error during userdelete controller : ${err}`)
+    return res.status(500).json({ message: 'Internal server error' })
+  }
+}
+
+// end of delete user
+
+// updated user
+
+const userUpdate = async (req, res) => {
+  try {
+    const { id } = req.params
+    const updatedData = req.body
+    const updateUser = await User.findByIdAndUpdate(id, updatedData, {
+      new: true,
+      runValidators: true,
+    })
+    if (!updateUser) {
+      return res.status(404).json({ message: 'user not found' })
+    }
+
+    return res
+      .status(200)
+      .json({ message: 'user updated sucessfully', user: updateUser })
+  } catch (err) {
+    console.log(`Error during  user update: ${err}`)
+    return res.status(500).json({ message: 'Internal server error' })
+  }
+}
+// end of updated user
+
+module.exports = { signup, login, logout, feed, user, userDelete, userUpdate }
