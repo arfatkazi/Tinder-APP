@@ -1,6 +1,7 @@
 const User = require('../models/user.model')
 const bcrypt = require('bcrypt')
-
+const jwt = require('jsonwebtoken')
+const generateTokenAndCookie = require('../utils/generateTokenAndCookie')
 //signup controller
 
 const signup = async (req, res) => {
@@ -37,8 +38,10 @@ const signup = async (req, res) => {
 
     await newUser.save()
 
+    const token = await generateTokenAndCookie(res, newUser)
     return res.status(201).json({
       message: 'New user created successfully!',
+      token,
       user: {
         id: newUser._id,
         firstName: newUser.firstName,
@@ -82,8 +85,37 @@ const login = async (req, res) => {
       })
     }
 
+    const token = req.cookies.token
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        if (decoded.id === user._id.toString()) {
+          return res.status(200).json({
+            message: 'Login successful, using existing token',
+            token,
+            user: {
+              id: user._id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              contact: user.contact,
+              gender: user.gender,
+              age: user.age,
+              height: user.height,
+            },
+          })
+        }
+      } catch (err) {
+        console.log(`error to check exisitng cookie: ${err}`)
+      }
+    }
+
+    const newToken = await generateTokenAndCookie(res, user)
+
     return res.status(200).json({
       message: 'Login successful',
+      token: newToken,
+      token,
       user: {
         id: user._id,
         firstName: user.firstName,

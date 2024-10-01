@@ -1,12 +1,15 @@
 require('dotenv').config()
 const express = require('express')
-const adminAuth = require('./middlewares/auth')
+// const adminAuth = require('./middlewares/auth')
 const app = express()
 const PORT = process.env.PORT || 6000
 const ConnectDB = require('./config/db')
 const userRoutes = require('./routes/user.route')
+const cookieParser = require('cookie-parser')
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
 
 app.use('/api/user', userRoutes)
 
