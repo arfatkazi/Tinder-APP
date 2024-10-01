@@ -1,14 +1,17 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+
 const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
       required: [true, 'First name is required'],
+      trim: true,
     },
     lastName: {
       type: String,
       required: [true, 'Last name is required'],
+      trim: true,
     },
     password: {
       type: String,
@@ -19,6 +22,7 @@ const userSchema = new mongoose.Schema(
     age: {
       type: Number,
       required: [true, 'Age is required'],
+      min: [18, 'Age must be at least 18 years'],
     },
     gender: {
       type: String,
@@ -29,36 +33,67 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Email is required'],
       unique: true,
+      trim: true,
+      lowercase: true,
+      validate: {
+        validator: function (v) {
+          return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v)
+        },
+        message: (props) => `${props.value} is not a valid email!`,
+      },
     },
     contact: {
       type: String,
       required: [true, 'Contact number is required'],
       minlength: [10, 'Contact number must be at least 10 digits'],
+      validate: {
+        validator: function (v) {
+          return /^\d+$/.test(v)
+        },
+        message: (props) => `${props.value} is not a valid contact number!`,
+      },
     },
-
     height: {
       type: Number,
-      required: [true, 'Height is required'], // Height is now required
+      required: [true, 'Height is required'],
       min: [50, 'Height must be at least 50 cm'],
+    },
+    profilePicture: {
+      type: String,
+      default: 'default.jpg',
+    },
+    bio: {
+      type: String,
+      maxlength: [200, 'Bio cannot be longer than 200 characters'],
+    },
+    interests: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }
 )
 
-// userSchema.pre('save', async (next) => {
-//   const user = this
+// Virtual for full name
+userSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`
+})
 
-//   if (!user.isModified('password')) return next()
+userSchema.pre('save', async function (next) {
+  const user = this
 
-//   try {
-//     const salt = await bcrypt.genSalt(10)
-//     user.password = await bcrypt.hash(user.password, salt)
-//     next()
-//   } catch (err) {
-//     return next(err)
-//   }
-// })
+  if (!user.isModified('password')) return next()
 
+  try {
+    const salt = await bcrypt.genSalt(10)
+    user.password = await bcrypt.hash(user.password, salt)
+    next()
+  } catch (err) {
+    return next(err)
+  }
+})
+
+userSchema.index({ email: 1 })
 const User = mongoose.model('User', userSchema)
 
 module.exports = User
