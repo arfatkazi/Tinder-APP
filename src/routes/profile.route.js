@@ -1,13 +1,7 @@
 const express = require('express')
-const { Profileview } = require('../controllers/user.controller')
-const UserAuth = require('../middlewares/auth')
 const router = express.Router()
-
-router.get('/view', UserAuth, Profileview)
-router.patch('/edit')
-router.patch('/password')
-
-module.exports = router
+const { Profileview, profileEdit } = require('../controllers/user.controller')
+const UserAuth = require('../middlewares/auth')
 
 // const UserAuth = require('../middlewares/auth')
 // update user
@@ -18,3 +12,9 @@ module.exports = router
 
 // fetch data
 // router.get('/users', UserAuth, user)
+
+router.get('/profile/view', UserAuth, Profileview)
+router.patch('/profile/edit', UserAuth, profileEdit)
+router.patch('/password')
+
+module.exports = router

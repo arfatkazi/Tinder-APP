@@ -243,29 +243,47 @@ const userUpdate = async (req, res) => {
 }
 // end of updated user
 
-// view controller
-const Profileview = async (req, res) => {
+// Profileview controller
+const Profileview = (req, res) => {
   try {
-    let { email, password } = req.body
-    if (!email || !password) {
-      return res
-        .status(401)
-        .json({ message: 'email and password are required!' })
-    }
+    const user = req.user // Use the user data from the token validated in UserAuth
 
-    const users = await User.find({ email: { $ne: email } })
-
-    if (users.length === 0) {
-      return res.status(404).json('No users found')
-    }
-
-    return res.status(200).json({ message: 'user found', users: users })
+    return res.status(200).json({
+      message: 'Profile fetched successfully',
+      profile: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        contact: user.contact,
+        gender: user.gender,
+        age: user.age,
+        height: user.height,
+      },
+    })
   } catch (err) {
-    console.log(`Error during feed: ${err}`)
+    console.error(`Error during profile view: ${err.message}`)
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
-// end of view controller
+
+// end of Profileview controller
+
+// PROFILE EDIT
+const profileEdit = (req, res) => {
+  const user = req.user
+
+  return res.status(200).json({
+    message: 'Profile Edited  successfully',
+    profile: {
+      id: user._id,
+      gender: user.gender,
+      age: user.age,
+      height: user.height,
+    },
+  })
+}
+//END OF  PROFILE EDIT
 
 module.exports = {
   signup,
@@ -276,4 +294,5 @@ module.exports = {
   Profileview,
   userDelete,
   userUpdate,
+  profileEdit,
 }

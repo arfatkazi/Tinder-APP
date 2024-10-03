@@ -15,7 +15,7 @@ app.use(cookieParser())
 
 app.use('/user', authRoutes)
 app.use('/user', userRoutes)
-app.use('/profile', profileRoutes)
+app.use('/user', profileRoutes)
 app.use('request', connectRequestRoutes)
 
 const startServer = async () => {
