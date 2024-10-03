@@ -2,8 +2,8 @@ const User = require('../models/user.model')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const generateTokenAndCookie = require('../utils/generateTokenAndCookie')
-//signup controller
 
+//signup controller
 const signup = async (req, res) => {
   try {
     let { firstName, lastName, password, contact, email, gender, age, height } =
@@ -58,11 +58,9 @@ const signup = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
-
 //end of signup controller
 
 // login controller
-
 const login = async (req, res) => {
   try {
     let { email, password } = req.body
@@ -136,11 +134,9 @@ const login = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
-
 //end of login controller
 
 // logout controller
-
 const logout = async (req, res, next) => {
   try {
     res.clearCookie('jwt', {
@@ -154,7 +150,6 @@ const logout = async (req, res, next) => {
     next(err) // pass error to error-handling middleware
   }
 }
-
 //end of  logout controller
 
 // feed controller
@@ -179,7 +174,6 @@ const feed = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
-
 // end of feed controller
 
 // get all user controller
@@ -195,11 +189,9 @@ const user = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
-
 //end of  get all user controller
 
 // delete user
-
 const userDelete = async (req, res) => {
   try {
     const { id } = req.params
@@ -216,11 +208,9 @@ const userDelete = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
-
 // end of delete user
 
 // updated user
-
 const userUpdate = async (req, res) => {
   try {
     const { id } = req?.params
