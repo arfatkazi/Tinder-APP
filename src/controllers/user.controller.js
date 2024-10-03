@@ -139,7 +139,7 @@ const login = async (req, res) => {
 // logout controller
 const logout = async (req, res, next) => {
   try {
-    res.clearCookie('jwt', {
+    res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -243,4 +243,37 @@ const userUpdate = async (req, res) => {
 }
 // end of updated user
 
-module.exports = { signup, login, logout, feed, user, userDelete, userUpdate }
+// view controller
+const Profileview = async (req, res) => {
+  try {
+    let { email, password } = req.body
+    if (!email || !password) {
+      return res
+        .status(401)
+        .json({ message: 'email and password are required!' })
+    }
+
+    const users = await User.find({ email: { $ne: email } })
+
+    if (users.length === 0) {
+      return res.status(404).json('No users found')
+    }
+
+    return res.status(200).json({ message: 'user found', users: users })
+  } catch (err) {
+    console.log(`Error during feed: ${err}`)
+    return res.status(500).json({ message: 'Internal server error' })
+  }
+}
+// end of view controller
+
+module.exports = {
+  signup,
+  login,
+  logout,
+  feed,
+  user,
+  Profileview,
+  userDelete,
+  userUpdate,
+}

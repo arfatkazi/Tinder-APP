@@ -6,7 +6,7 @@ const generateTokenAndCookie = async (res, user) => {
     email: user.email,
   }
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' })
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' })
 
   res.cookie('token', token, {
     httpOnly: true,
