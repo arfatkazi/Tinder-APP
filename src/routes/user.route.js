@@ -1,4 +1,5 @@
 const express = require('express')
+const router = express.Router()
 const {
   signup,
   login,
@@ -8,21 +9,22 @@ const {
   userDelete,
   userUpdate,
 } = require('../controllers/user.controller')
-const router = express.Router()
+
+const UserAuth = require('../middlewares/auth')
 
 // fetch data
-router.get('/users', user)
-router.get('/feeds', feed)
+router.get('/users', UserAuth, user)
+router.get('/feeds', UserAuth, feed)
 
 // authorized data
 router.post('/signup', signup)
-router.post('/login', login)
-router.post('/logout', logout)
+router.post('/login', UserAuth, login)
+router.post('/logout', UserAuth, logout)
 
 // update user
-router.patch('/update/:id', userUpdate)
+router.patch('/update/:id', UserAuth, userUpdate)
 
 // delete user
-router.delete('/delete/:id', userDelete)
+router.delete('/delete/:id', UserAuth, userDelete)
 
 module.exports = router

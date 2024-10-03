@@ -7,7 +7,7 @@ const generateTokenAndCookie = require('../utils/generateTokenAndCookie')
 const signup = async (req, res) => {
   try {
     let { firstName, lastName, password, contact, email, gender, age, height } =
-      req?.body
+      req.body
 
     if (!firstName || !lastName || !email || !password) {
       return res
@@ -106,7 +106,11 @@ const login = async (req, res) => {
           })
         }
       } catch (err) {
-        console.log(`error to check exisitng cookie: ${err}`)
+        if (err.name === 'TokenExpiredError') {
+          console.log('Token expired, generating a new token.')
+        } else {
+          console.log(`Error checking existing cookie: ${err}`)
+        }
       }
     }
 
@@ -128,7 +132,7 @@ const login = async (req, res) => {
       },
     })
   } catch (err) {
-    console.error(`Error during signup: ${err}`)
+    console.error(`Error during login: ${err}`)
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
@@ -137,8 +141,18 @@ const login = async (req, res) => {
 
 // logout controller
 
-const logout = async (req, res) => {
-  res.send('logout')
+const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('jwt', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    })
+    return res.status(200).json({ message: 'Logged out successfully!' })
+  } catch (err) {
+    console.error(`Error during logout: ${err}`)
+    next(err) // pass error to error-handling middleware
+  }
 }
 
 //end of  logout controller
@@ -146,11 +160,19 @@ const logout = async (req, res) => {
 // feed controller
 const feed = async (req, res) => {
   try {
-    let { email } = req.body
+    let { email, password } = req.body
+    if (!email || !password) {
+      return res
+        .status(401)
+        .json({ message: 'email and password are required!' })
+    }
+
     const users = await User.find({ email: { $ne: email } })
+
     if (users.length === 0) {
       return res.status(404).json('No users found')
     }
+
     return res.status(200).json({ message: 'user found', users: users })
   } catch (err) {
     console.log(`Error during feed: ${err}`)
