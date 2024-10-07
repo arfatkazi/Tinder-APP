@@ -1,6 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const { Profileview, profileEdit } = require('../controllers/user.controller')
+const {
+  Profileview,
+  profileEdit,
+  forgotPassword,
+} = require('../controllers/user.controller')
 const UserAuth = require('../middlewares/auth')
 
 // const UserAuth = require('../middlewares/auth')
@@ -15,6 +19,6 @@ const UserAuth = require('../middlewares/auth')
 
 router.get('/profile/view', UserAuth, Profileview)
 router.patch('/profile/edit', UserAuth, profileEdit)
-router.patch('/password')
+router.patch('/edit/password', UserAuth, forgotPassword)
 
 module.exports = router

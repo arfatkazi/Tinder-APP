@@ -304,7 +304,7 @@ const profileEdit = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: 'Profile Edited  successfully',
+      message: `${user.fullName} your Profile Edited  successfully`,
       profile: {
         id: editUser._id,
         age: editUser.age,
@@ -322,6 +322,27 @@ const profileEdit = async (req, res) => {
 }
 //END OF  PROFILE EDIT
 
+// forgot the password
+const forgotPassword = async (req, res) => {
+  try {
+    const user = req.user
+    const { password } = req.body
+
+    if (!password) {
+      return res.status(400).json({ message: 'password is required!' })
+    }
+
+    user.password = password
+    await user.save()
+
+    return res.status(200).json({ message: 'Password changed successfully' })
+  } catch (err) {
+    console.log(`Error during forgot password controller : ${err.message}`)
+    return res.status(500).json({ message: 'Inrerval server error.' })
+  }
+}
+// end of  forgot the password
+
 module.exports = {
   signup,
   login,
@@ -332,4 +353,5 @@ module.exports = {
   userDelete,
   userUpdate,
   profileEdit,
+  forgotPassword,
 }
