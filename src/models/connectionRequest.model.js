@@ -32,9 +32,11 @@ const connectionRequestSchema = new mongoose.Schema(
 
 connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 }, { unique: true })
 
+connectionRequestSchema.index({ status: 1 })
+
 //Custom validation to prevent users from sending requests to themselves
 
-connectionRequestSchema.pre('save', async function (next) {
+connectionRequestSchema.pre('save', function (next) {
   if (this.fromUserId.equals(this.toUserId)) {
     return next(new Error('You cannot send a request to yourself.'))
   }
@@ -42,4 +44,9 @@ connectionRequestSchema.pre('save', async function (next) {
   next()
 })
 
-module.exports = mongoose.model('ConnectionRequest', connectionRequestSchema)
+const ConnectionRequestModel = mongoose.model(
+  'ConnectionRequest',
+  connectionRequestSchema
+)
+
+module.exports = ConnectionRequestModel
