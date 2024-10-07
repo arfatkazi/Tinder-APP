@@ -27,7 +27,10 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ['male', 'female', 'others'],
+      enum: {
+        values: ['male', 'female', 'others'],
+        message: '{VALUE} is incorrect data type',
+      },
       required: [true, 'Gender is required'],
     },
     email: {
