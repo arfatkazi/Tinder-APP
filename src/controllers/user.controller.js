@@ -270,18 +270,55 @@ const Profileview = (req, res) => {
 // end of Profileview controller
 
 // PROFILE EDIT
-const profileEdit = (req, res) => {
-  const user = req.user
+const profileEdit = async (req, res) => {
+  try {
+    const user = req.user
+    const {
+      firstName,
+      lastName,
+      password,
+      gender,
+      email,
+      age,
+      contact,
+      height,
+      profilePicture,
+      bio,
+      interests,
+    } = req.body
 
-  return res.status(200).json({
-    message: 'Profile Edited  successfully',
-    profile: {
-      id: user._id,
-      gender: user.gender,
-      age: user.age,
-      height: user.height,
-    },
-  })
+    if (firstName || lastName || password || gender || email) {
+      return res.status(400).json({
+        message:
+          'You cannot change the following fields: firstName, lastName, password, gender, email',
+      })
+    }
+    const editUser = await User.findOneAndUpdate(
+      { _id: user._id },
+      { age, contact, height, profilePicture, bio, interests },
+      { new: true, runValidators: true }
+    )
+
+    if (!editUser) {
+      return res.status(404).json({ message: 'user not found!' })
+    }
+
+    return res.status(200).json({
+      message: 'Profile Edited  successfully',
+      profile: {
+        id: editUser._id,
+        age: editUser.age,
+        contact: editUser.contact,
+        height: editUser.height,
+        profilePicture: editUser.profilePicture,
+        bio: editUser.bio,
+        interests: editUser.interests,
+      },
+    })
+  } catch (err) {
+    console.log(`Error during  edit profile : ${err.message}`)
+    return res.status(500).json({ message: 'Internal server error' })
+  }
 }
 //END OF  PROFILE EDIT
 
