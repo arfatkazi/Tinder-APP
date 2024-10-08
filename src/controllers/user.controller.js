@@ -1,3 +1,4 @@
+const ConnectionRequest = require("../models/connectionRequest.model");
 const User = require("../models/user.model");
 
 // feed controller
@@ -23,6 +24,42 @@ const feed = async (req, res) => {
   }
 };
 // end of feed controller
+
+//get all the pendin user to see my logged in user
+
+const PendingUserToMyLoginUser = async (req, res) => {
+  try {
+    const loggedIn = req.user;
+
+    const allPendingUser = await ConnectionRequest.find({
+      toUserId: loggedIn._id,
+      status: "interested",
+    }).populate("fromUserId", [
+      "firstName",
+      "lastName",
+      "height",
+      "age",
+      "gender",
+      "bio",
+      "profilePicture",
+      "interests",
+    ]);
+
+    if (allPendingUser.length === 0) {
+      return res.status(404).json({ message: "Request not found!" });
+    }
+
+    return res.status(200).json({
+      message: "all pending user shown to me !",
+      pendingRequests: allPendingUser,
+    });
+  } catch (err) {
+    console.error(`Error during penidng user controller ${err.message}`);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+// end of get all the pendin user to see my logged in user
 
 // get all user controller
 const user = async (req, res) => {
@@ -92,6 +129,7 @@ const userUpdate = async (req, res) => {
 // end of updated user
 module.exports = {
   feed,
+  PendingUserToMyLoginUser,
   user,
   userDelete,
   userUpdate,
