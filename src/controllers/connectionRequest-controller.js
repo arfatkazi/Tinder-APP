@@ -1,6 +1,7 @@
+const mongoose = require("mongoose");
 const User = require("../models/user.model");
 const ConnectionRequest = require("../models/connectionRequest.model");
-const mongoose = require("mongoose");
+
 // interested/IgnoreCard card
 const interestedIgnoreCard = async (req, res) => {
   try {
@@ -48,37 +49,38 @@ const interestedIgnoreCard = async (req, res) => {
 //Accepted Rejected card
 const AcceptedRejectedCard = async (req, res) => {
   try {
-    const fromUserId = req.params.fromUserId; // who request you
-    const toUserId = req.user._id; // it is logged in user
+    const fromUserId = req.params.fromUserId;
+    const toUserId = req.user._id;
     const status = req.path.includes("accepted") ? "accepted" : "rejected";
 
-    const request = await ConnectionRequest.findOne({
+    const toUserExist = await User.findById(toUserId);
+
+    if (!toUserExist) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+    const exisitngRequest = await ConnectionRequest.findOne({
       fromUserId,
       toUserId,
       status: "interested",
     });
 
-    if (!request) {
-      return res.status(404).json({ message: "Connection request not found!" });
+    if (!exisitngRequest) {
+      return res.status(404).json({
+        message: "No pending connection request found for this user!",
+      });
     }
 
-    // const fromUser = await User.findById(fromUserId).select("fullName");
+    exisitngRequest.status = status;
 
-    // if (!fromUser) {
-    //   return res.status(404).json({ message: `User not Found!` });
-    // }
+    const updateRequest = await exisitngRequest.save();
 
-    request.status = status; // update the request of exisitng user
-
-    const data = await request.save();
-
-    return res.status(201).json({
-      message: `${req.user.fullName} has ${status} the connection request  successfully`,
-      data,
+    return res.status(200).json({
+      message: `Connection request ${status} successfully by ${req.user.firstName}`,
+      data: updateRequest,
     });
   } catch (err) {
-    console.error(`Error during accepted/rejected controller : ${err.message}`);
-    return res.status(500).json({ message: "Internal server error" });
+    console.log(`Error during accepted rejected controller ${err.message}`);
+    return res.status(500).json({ message: `Interval server error ${err}` });
   }
 };
 //end of Accepted Rejected card
