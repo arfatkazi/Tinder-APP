@@ -62,28 +62,30 @@ const PendingUserToMyLoginUser = async (req, res) => {
 // end of get all the pendin user to see my logged in user
 
 const connectionShown = async (req, res) => {
-  // try {
-  //   const loggedIn = req.user;
-  //   const requestConnections = await ConnectionRequest.find({
-  //     $or: [
-  //       { fromUserId: loggedIn, status: "accepted" },
-  //       { toUserId: loggedIn, status: "accepted" },
-  //     ],
-  //   }).populate("fromUserId", [
-  //     "firstName",
-  //     "lastName",
-  //     "height",
-  //     "age",
-  //     "gender",
-  //   ]);
-  //   if (requestConnections.length === 0) {
-  //     return res.status(404).json({ message: "No User Connection Found!" });
-  //   }
-  //   return res.status(200).json({ data: requestConnections });
-  // } catch (err) {
-  //   console.error(`Error during connection shown ${err.message}`);
-  //   return res.status(500).json({ message: "Intenral server error" });
-  // }
+  try {
+    const loggedIn = req.user;
+    const requestConnections = await ConnectionRequest.find({
+      $or: [
+        { fromUserId: loggedIn, status: "accepted" },
+        { toUserId: loggedIn, status: "accepted" },
+      ],
+    }).populate("fromUserId", [
+      "firstName",
+      "lastName",
+      "height",
+      "age",
+      "gender",
+    ]);
+    if (requestConnections.length === 0) {
+      return res.status(404).json({ message: "No User Connection Found!" });
+    }
+
+    const filterFromUserData = requestConnections.map((row) => row.fromUserId);
+    return res.status(200).json({ data: filterFromUserData });
+  } catch (err) {
+    console.error(`Error during connection shown ${err.message}`);
+    return res.status(500).json({ message: "Intenral server error" });
+  }
 };
 
 // get all user controller
