@@ -41,7 +41,6 @@ const signup = async (req, res) => {
     const token = await generateTokenAndCookie(res, newUser);
     return res.status(201).json({
       message: "New user created successfully!",
-      token,
       user: {
         id: newUser._id,
         firstName: newUser.firstName,
