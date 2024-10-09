@@ -5,27 +5,41 @@ const User = require("../models/user.model");
 const feed = async (req, res) => {
   try {
     const LoggedIn = req.user;
-
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skipFormula = (page - 1) * limit;
     const requestConnection = await ConnectionRequest.find({
       $or: [{ fromUserId: LoggedIn }, { toUserId: LoggedIn }],
     }).select("fromUserId toUserId status");
 
-    if (!requestConnection) {
-      return (
-        res.status(404), json({ message: "request connections not found!" })
-      );
+    if (!requestConnection || requestConnection.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "request connections not found!" });
     }
 
     const hideFromFeed = new Set();
     requestConnection.forEach((req) => {
-      hideFromFeed.add(req.fromUserId.toString());
-      hideFromFeed.add(req.toUserId.toString());
+      hideFromFeed.add(req.fromUserId._id.toString());
+      hideFromFeed.add(req.toUserId._id.toString());
     });
 
-    console.log(hideFromFeed);
-    return res
-      .status(200)
-      .json({ message: "show all my feed", requestConnection });
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideFromFeed) } },
+        { _id: { $ne: LoggedIn._id } },
+      ],
+    })
+      .select(
+        "firstName lastName age height interests bio gender profilePicture "
+      )
+      .skip(skipFormula)
+      .limit(limit);
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "Users not Found!" });
+    }
+    return res.status(200).json({ message: "show all my feed", users });
   } catch (err) {
     console.error(`Error during feed: ${err.message}`);
     return res.status(500).json({ message: "Internal server error" });
